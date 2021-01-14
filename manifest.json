@@ -1,0 +1,26 @@
+{
+
+  "manifest_version": 2,
+  "name": "xTimes",
+  "version": "1.0",
+  "description": "Allows you to download cryptic crosswords from The Times in .ipuz format.",
+  "icons": {
+    "48": "icons/xtimes-48.png"
+  },
+
+	"permissions": [
+		"webRequest", "webRequestBlocking", "tabs", "downloads", "*://*.thetimes.co.uk/puzzles/*"
+	],
+
+	"background": {
+		"scripts": ["xtimes_bg.js"]
+	},
+
+	"browser_action": {
+		"default_icon": {
+			"32": "icons/xtimes-32.png",
+			"16": "icons/xtimes-16.png"
+		}
+	}
+
+}
