@@ -2,19 +2,27 @@
 
   "manifest_version": 2,
   "name": "xTimes",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Allows you to download cryptic crosswords from The Times in .ipuz format.",
   "icons": {
     "48": "icons/xtimes-48.png"
   },
 
 	"permissions": [
-		"webRequest", "webRequestBlocking", "tabs", "downloads", "*://*.thetimes.co.uk/puzzles/*"
+		"webRequest", "webRequestBlocking", "tabs", "downloads", "*://*.thetimes.co.uk/puzzle*"
 	],
 
 	"background": {
 		"scripts": ["xtimes_bg.js"]
 	},
+
+	"content_scripts": [
+		{
+			"matches": ["*://*.thetimes.co.uk/puzzleclub/crosswordclub/puzzles/crossword/*", "*://*.thetimes.co.uk/puzzleclub/crosswordclub/play/crossword/*"],
+			"all_frames": true,
+			"js": ["xtimes_cs.js"]
+		}
+	],
 
 	"browser_action": {
 		"default_icon": {

@@ -1,3 +1,6 @@
+// xtimes_bg.js
+// Background script runs in the background of matched pages
+
 // Set global variable for response
 var response = '';
 
@@ -7,7 +10,7 @@ browser.tabs.onUpdated.addListener(
 );
 
 function testEligibility(_, _, c) {
-	if ( c.url.match('https:\/\/www.thetimes.co.uk\/puzzles\/times-*.') ) {
+	if ( c.url.match('https:\/\/www.thetimes.co.uk\/puzzle*.') ) {
 		browser.browserAction.enable();
 	} else {
 		browser.browserAction.disable();
@@ -115,7 +118,11 @@ function _to_ipuz(data) {
 	// Parse solution definition
 	for ( let i in data.copy.clues ) {
 		for ( let clue in data.copy.clues[i].clues ) {
-			ipuz.clues[data.copy.clues[i].title].push([parseInt(data.copy.clues[i].clues[clue].number), data.copy.clues[i].clues[clue].clue]);
+			ipuz.clues[data.copy.clues[i].title].push({
+				number: parseInt(data.copy.clues[i].clues[clue].number),
+				clue: data.copy.clues[i].clues[clue].clue,
+				enumeration: parseInt(data.copy.clues[i].clues[clue].length)
+			});
 		}
 	}
 
