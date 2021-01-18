@@ -10,7 +10,7 @@ browser.tabs.onUpdated.addListener(
 );
 
 function testEligibility(_, _, c) {
-	if ( c.url.match('https:\/\/www.thetimes.co.uk\/puzzle*.') ) {
+	if ( c.url.match( /https:\/\/www.thetimes.co.uk\/puzzle.*\d+/ ) ) {
 		browser.browserAction.enable();
 	} else {
 		browser.browserAction.disable();
@@ -38,6 +38,13 @@ function iconClicked() {
 		filename: ipuz.title+'.json',
 		url: ipuz_url,
 	});
+}
+
+// Get data from context script if puzzle in iframe
+browser.runtime.onMessage.addListener(fetchPuzzle);
+
+function fetchPuzzle(message) {
+  response = JSON.stringify(message);
 }
 
 // Listen for requests of the crossword data array
