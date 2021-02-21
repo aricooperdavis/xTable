@@ -1,82 +1,30 @@
 // xtimes_bg.js
-// Background script runs in the background of matched pages
+// Background script runs in the background at all times
 
-// Set global variable for response
-var response = '';
+browser.pageAction.onClicked.addListener(iconClicked);
 
-// Enable/disable the icon
-browser.tabs.onUpdated.addListener(
-	testEligibility
-);
+function iconClicked(tab) {
+	// Get iPuz from content script
+	let iPuzPromise = browser.tabs.sendMessage(
+			tab.id,
+			{action: "click"}
+		).then( response => {
+		// Convert to iPuz format
+		ipuz = _to_ipuz(response.data);
 
-function testEligibility(_, _, c) {
-	if ( c.url.match( /https:\/\/www.thetimes.co.uk\/puzzle.*\d+/ ) ) {
-		browser.browserAction.enable();
-	} else {
-		browser.browserAction.disable();
-	}
-}
+		// Process for download
+		let ipuz_blob = new Blob(
+			[JSON.stringify(ipuz)],
+			{type: "text/json;charset=utf-8"}
+		);
+		let ipuz_url = URL.createObjectURL(ipuz_blob);
 
-// Listen for icon click
-browser.browserAction.onClicked.addListener(
-	iconClicked
-);
-
-function iconClicked() {
-	// Download json
-	let ipuz = _to_ipuz(JSON.parse(response).data);
-
-	// Process for download
-	let ipuz_blob = new Blob(
-		[JSON.stringify(ipuz)],
-		{type: "text/json;charset=utf-8"}
-	);
-	let ipuz_url = URL.createObjectURL(ipuz_blob);
-
-	// Download result
-	browser.downloads.download({
-		filename: ipuz.title+'.json',
-		url: ipuz_url,
+		// Download result
+		browser.downloads.download({
+			filename: ipuz.title+'.json',
+			url: ipuz_url,
+		});
 	});
-}
-
-// Get data from context script if puzzle in iframe
-browser.runtime.onMessage.addListener(fetchPuzzle);
-
-function fetchPuzzle(message) {
-  response = JSON.stringify(message);
-}
-
-// Listen for requests of the crossword data array
-browser.webRequest.onBeforeRequest.addListener(
-  listener,
-  {urls: ["*://feeds.thetimes.co.uk/puzzles/crossword/*/data.json"]},
-	["blocking"]
-);
-
-function listener(details) {
-
-	// Create an empty variable to store the response data
-	let decoder = new TextDecoder("utf-8");
-	let filter = browser.webRequest.filterResponseData(details.requestId);
-
-	// Clear the response variable if a new response is coming in
-	filter.onstart = event => {
-		response = '';
-	}
-
-	// When a data chunk is receieved add it to the end of the data string
-	filter.ondata = event => {
-		let str = decoder.decode(event.data, {stream: true});
-		response += str;
-		filter.write(event.data);
-	}
-
-	// When the response is complete then close the filter
-	filter.onstop = event => {
-		filter.close();
-	}
-
 }
 
 /* Helper functions */
@@ -128,7 +76,7 @@ function _to_ipuz(data) {
 			ipuz.clues[data.copy.clues[i].title].push({
 				number: parseInt(data.copy.clues[i].clues[clue].number),
 				clue: data.copy.clues[i].clues[clue].clue,
-				enumeration: parseInt(data.copy.clues[i].clues[clue].length)
+				enumeration: data.copy.clues[i].clues[clue].format
 			});
 		}
 	}
